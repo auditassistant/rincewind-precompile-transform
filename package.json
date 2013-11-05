@@ -1,0 +1,36 @@
+{
+  "name": "rincewind-precompile-transform",
+  "version": "0.0.0",
+  "description": "Browserify transform to inline and precompile rincewind templates",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "tap test/*.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/mmckegg/rincewind-precompile-transform.git"
+  },
+  "keywords": [
+    "rincewind",
+    "browserify",
+    "precompile",
+    "browser",
+    "transform"
+  ],
+  "author": "Matt McKegg",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mmckegg/rincewind-precompile-transform/issues"
+  },
+  "dependencies": {
+    "callify": "0.x",
+    "rincewind": "0.x",
+    "static-eval": "0.x"
+  },
+  "devDependencies": {
+    "tape": "*"
+  }
+}
