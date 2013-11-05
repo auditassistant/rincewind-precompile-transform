@@ -1,7 +1,7 @@
 rincewind-precompile-transform
 ===
 
-Browserify transform to inline and precompile rincewind templates.
+Browserify transform to inline and precompile [rincewind](https://github.com/mmckegg/rincewind) templates.
 
 Finds all rincewind calls in source and replaces with parsed JSON precompiled version. If a call contains a reference to `fs.readFileSync`, the file is loaded first.
 
