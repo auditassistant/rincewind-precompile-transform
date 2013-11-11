@@ -7,64 +7,42 @@ var path = require('path')
 module.exports = callify({
   rincewind: function(node, params){
     var r = params.requires
-    var arg1 = node.arguments[0]
-    var arg2 = node.arguments[1]
+    var arg = getStaticArg(node.arguments[0], params)
+    var dirname = path.dirname(params.file)
 
-    var html = arg1.value
-    var options = evalArg(arg2)
-
-    // handle readFileSync
-    if (isRFS(arg1, params)){
-      html = readFileSync.apply(this, getStaticArgs(arg1, params))
+    if (typeof arg == 'string'){
+      var view = View(arg)
+      var newArg = dump(view.getCompiledView(), dirname)
+      node.arguments[0].update(newArg)
     }
 
-    var view = View(html, options)
-    arg1.update(JSON.stringify(view.getView()) || 'undefined')
-  },
-
-  // require hooks
-  'fs.readFileSync': true,
-  'fs': true
+  }
 })
 
-function evalArg(node){
-  if (node){
-    if (node.type === 'Literal'){
-      return node.value
-    } else if (node.type === 'ObjectExpression'){
-      var result = {}
-      for (var i=0;i<node.properties.length;i++){
-        var prop = node.properties[i]
-        var propKey = prop.key.name || prop.key.value
-        result[propKey] = prop.value.value
-      }
-      return result
+function dump(view, dirname){
+  if (view){
+    if (view.require){
+      return 'require(' + JSON.stringify('./' + path.relative(dirname, view.require)) + ')'
+    } else {
+      return '{' + Object.keys(view).filter(function(key){
+        return key !== 'requires'
+      }).map(function(key){
+        if (key === 'views'){
+          var views = view.views
+          return '"views": {' + Object.keys(views).map(function(viewKey){
+            return JSON.stringify(viewKey) + ': ' + dump(views[viewKey], dirname)
+          }).join(',') + '}'
+        } else {
+          return JSON.stringify(key) + ': ' + JSON.stringify(view[key])
+        }
+      }).join(', ') + '}'
     }
   }
 }
 
-function getCallMembers(node){
-  if (node.type === 'MemberExpression' && node.property.type === 'Identifier'){
-    return (getCallMembers(node.object) || []).concat(node.property.name)
-  } else if (node.type === 'Identifier'){
-    return [node.name]
-  }
-  return []
-}
-
-function getStaticArgs(node, params){
-  return node.arguments.map(function(arg){
-    return staticEval(arg, {
-      __dirname: path.dirname(params.file), 
-      __filename: params.file
-    })
+function getStaticArg(node, params){
+  return staticEval(node, {
+    __dirname: path.dirname(params.file), 
+    __filename: params.file
   })
-}
-
-function isRFS(node, params){
-  if (node.type === 'CallExpression'){
-    var calls = getCallMembers(node.callee)
-    var match = params.requires[calls[0]]
-    return match === 'fs.readFileSync' || (match === 'fs' && calls[1] === 'readFileSync')
-  }
 }

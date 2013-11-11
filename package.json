@@ -27,7 +27,7 @@
   },
   "dependencies": {
     "callify": "0.x",
-    "rincewind": "0.x",
+    "rincewind": "1.x",
     "static-eval": "0.x"
   },
   "devDependencies": {
