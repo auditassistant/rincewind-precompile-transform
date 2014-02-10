@@ -8,7 +8,7 @@ test('fs external view', function(t){
   p.on('data', function(data){
     t.equal(data, 
       'var View = require("rincewind")\n'+
-      'var render = View({"c": ["  ",{"c":[" <span>",{"c":["I am strong text"],"v":"strong"},"</span> "],"v":"header"}], , "views": {"header": {"c": ["<h1>",{"vc":true},"</h1>"], "views": {}},"strong": require("' + require.resolve('./views/strong.js') + '")}})\n'
+      'var render = View({"c": ["  ",{"c":[" <span>",{"c":["I am strong text"],"v":"strong"},"</span> "],"v":"header"}], "views": {"header": {"c": ["<h1>",{"vc":true},"</h1>"], "views": {}},"strong": require("./views/strong.js")}})\n'
     )
     t.end()
   })

@@ -1,48 +1,44 @@
 var callify = require('callify')
 var View = require('rincewind')
-var readFileSync = require('fs').readFileSync
 var staticEval = require('static-eval')
-var path = require('path')
+
+var join = require('path').join
+var getDirName = require('path').dirname
+var getRelativePath = require('path').relative
 
 module.exports = callify({
   rincewind: function(node, params){
     var r = params.requires
     var arg = getStaticArg(node.arguments[0], params)
-    var dirname = path.dirname(params.file)
+    var dirname = getDirName(params.file)
 
     if (typeof arg == 'string'){
-      var view = View(arg)
-      var newArg = dump(view.getCompiledView(), dirname)
+      var view = View(arg, {cache: false})
+      params.stream.emit('file', arg)
+      emitWatchPaths(params.stream, view.getCompiledView(), dirname)
+      var newArg = view.stringify(dirname)
       node.arguments[0].update(newArg)
     }
-
   }
 })
 
-function dump(view, dirname){
-  if (view){
-    if (view.require){
-      return 'require(' + JSON.stringify('./' + path.relative(dirname, view.require)) + ')'
-    } else {
-      return '{' + Object.keys(view).filter(function(key){
-        return key !== 'requires'
-      }).map(function(key){
-        if (key === 'views'){
-          var views = view.views
-          return '"views": {' + Object.keys(views).map(function(viewKey){
-            return JSON.stringify(viewKey) + ': ' + dump(views[viewKey], dirname)
-          }).join(',') + '}'
-        } else {
-          return JSON.stringify(key) + ': ' + JSON.stringify(view[key])
-        }
-      }).join(', ') + '}'
-    }
+function emitWatchPaths(stream, view, root){
+  if (view.requires){
+    Object.keys(view.requires).forEach(function(key){
+      var path = join(root, view.requires[key])
+      stream.emit('file', path)
+      if (view.views && view.views[key]){
+        emitWatchPaths(stream, view.views[key], getDirName(path))
+      }
+    })
+  } else if (view.require){
+    stream.emit('file', view.require)
   }
 }
 
 function getStaticArg(node, params){
   return staticEval(node, {
-    __dirname: path.dirname(params.file), 
+    __dirname: getDirName(params.file), 
     __filename: params.file
   })
 }
