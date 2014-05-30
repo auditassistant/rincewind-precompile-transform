@@ -34,6 +34,16 @@ function emitWatchPaths(stream, view, root){
   } else if (view.require){
     stream.emit('file', view.require)
   }
+
+  if (view.resources){
+    Object.keys(view.resources).forEach(function(key){
+      var resource = view.resources[key]
+      if (resource instanceof Object){
+        var path = join(root, resource.path)
+        stream.emit('file', path)
+      }
+    })
+  }
 }
 
 function getStaticArg(node, params){
