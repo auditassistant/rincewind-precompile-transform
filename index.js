@@ -5,6 +5,7 @@ var staticEval = require('static-eval')
 var join = require('path').join
 var getDirName = require('path').dirname
 var getRelativePath = require('path').relative
+var resolve = require('resolve')
 
 module.exports = callify({
   rincewind: function(node, params){
@@ -13,6 +14,11 @@ module.exports = callify({
     var dirname = getDirName(params.file)
 
     if (typeof arg == 'string'){
+
+      if (isPackageRequire(arg)){
+        arg = resolve.sync(arg, { basedir: dirname })
+      }
+
       var view = View(arg, {cache: false})
       params.stream.emit('file', arg)
       emitWatchPaths(params.stream, view.getCompiledView(), dirname)
@@ -50,4 +56,9 @@ function getStaticArg(node, params){
     __dirname: getDirName(params.file), 
     __filename: params.file
   })
+}
+
+
+function isPackageRequire(file){
+  return typeof file === 'string' && !!/^[^\.\/\\]/.exec(file)
 }
