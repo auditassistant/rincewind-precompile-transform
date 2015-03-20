@@ -60,5 +60,5 @@ function getStaticArg(node, params){
 
 
 function isPackageRequire(file){
-  return typeof file === 'string' && !!/^[^\.\/\\]/.exec(file)
+  return typeof file === 'string' && !!/^[^\/\\]/.exec(file)
 }
