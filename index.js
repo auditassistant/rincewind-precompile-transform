@@ -28,13 +28,18 @@ module.exports = callify({
   }
 })
 
-function emitWatchPaths(stream, view, root){
+function emitWatchPaths(stream, view, root, processed){
+  processed = processed || []
+
   if (view.requires){
     Object.keys(view.requires).forEach(function(key){
       var path = join(root, view.requires[key])
-      stream.emit('file', path)
-      if (view.views && view.views[key]){
-        emitWatchPaths(stream, view.views[key], getDirName(path))
+      if (!~processed.indexOf(path)) {
+        processed.push(path)
+        stream.emit('file', path)
+        if (view.views && view.views[key]){
+          emitWatchPaths(stream, view.views[key], getDirName(path), processed)
+        }
       }
     })
   } else if (view.require){

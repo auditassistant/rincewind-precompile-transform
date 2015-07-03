@@ -18,6 +18,22 @@ test('fs external view', function(t){
   p.end()
 })
 
+
+test('require circular view', function(t){
+  var p = precompile(__filename)
+  
+  p.on('data', function(data){
+    t.equal(data, 
+      "var View = require(\"rincewind\")\nvar render = View({\"c\": [\" <div>circular lol</div>\"], \"views\": {\"self\": \"$self\"}})\n"
+    )
+    t.end()
+  })
+
+  p.write('var View = require("rincewind")\n')
+  p.write('var render = View(__dirname + "/views/circular.html")\n')
+  p.end()
+})
+
 test('fs package view', function(t){
   var p = precompile(__filename)
   
