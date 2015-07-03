@@ -1,6 +1,6 @@
 {
   "name": "rincewind-precompile-transform",
-  "version": "1.4.0",
+  "version": "1.5.0",
   "description": "Browserify transform to inline and precompile rincewind templates",
   "main": "index.js",
   "directories": {
